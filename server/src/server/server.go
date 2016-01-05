@@ -1,8 +1,10 @@
 package main
 
 import (
+	"controller"
 	"fmt"
 	"log"
+	"model"
 	"net"
 )
 
@@ -29,5 +31,26 @@ func start() {
 
 func handleConn(c net.Conn) {
 	defer c.Close()
+	header := make([]byte, model.TagLen+model.LenLen)
+	_, err := c.Read(header)
+	if err != nil {
+		log.Println("Exit")
+		log.Fatal(err)
+	}
 
+	message := model.Message{}
+	message.Decode(header)
+
+	header = make([]byte, message.Len)
+	_, err = c.Read(header)
+	if err != nil {
+		log.Fatal(err)
+	}
+	message.Value = header
+
+	switch message.Tag {
+	case model.UserTag:
+		handler := controller.UserController{}
+		handler.Handle(message.Value)
+	}
 }

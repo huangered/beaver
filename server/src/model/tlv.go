@@ -1,8 +1,12 @@
-package core
+package model
 
 const (
-	Login  = 1
-	Logout = 2
+	TagLen = 2
+	LenLen = 4
+)
+
+const (
+	UserTag = 1
 )
 
 //    0    1     2    3    4    5      6
@@ -13,8 +17,8 @@ type Message struct {
 	Value []byte
 }
 
-func (t *Message) encode() []byte {
-	data := make([]byte, t.Len)
+func (t *Message) Encode() []byte {
+	data := make([]byte, t.Len+TagLen+LenLen)
 	// tag
 	data[0] = 0
 	data[1] = t.Tag
@@ -24,15 +28,13 @@ func (t *Message) encode() []byte {
 	data[4] = byte(t.Len >> 16)
 	data[5] = byte(t.Len >> 24)
 	// data
-	append(data, Value)
+	copy(data[6:], t.Value)
 	return data
 }
 
-func (t *Message) decode(data []byte) {
+func (t *Message) Decode(data []byte) {
 	// tag
 	t.Tag = data[1]
 	// len
 	t.Len = uint32(data[2]) + uint32(data[3])<<8 + uint32(data[4])<<16 + uint32(data[5])<<24
-	// data
-	t.Value = data[6:]
 }
