@@ -12,8 +12,7 @@ func main() {
 	fmt.Println("Start the server...")
 	//start()
 	StartApi("localhost:8000")
-	for {
-	}
+	StartSignal()
 }
 
 // start the tcp reciever.
