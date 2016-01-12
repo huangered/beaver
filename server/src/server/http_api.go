@@ -12,6 +12,7 @@ func StartApi(addr string) {
 			err       error
 			serverMux = http.NewServeMux()
 		)
+		serverMux.Handle("/version", httpVersionHandler{})
 		serverMux.Handle("/get", httpGetHandler{})
 		serverMux.Handle("/upload", httpUploadHandler{})
 		serverMux.Handle("/uploads", httpUploadsHandler{})
@@ -21,6 +22,14 @@ func StartApi(addr string) {
 			log.Printf("http.ListenAndServer(\"%s\") error(%v)", addr, err)
 		}
 	}()
+}
+
+type httpVersionHandler struct {
+}
+
+func (h httpVersionHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	var msg []byte = []byte(Version())
+	rw.Write(msg)
 }
 
 type httpGetHandler struct {
