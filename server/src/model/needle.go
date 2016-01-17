@@ -70,3 +70,23 @@ Padding:         %v
 -----------------------
 `, n.Header, n.Cookie, n.Key, n.AlternateKey, n.Flags, n.Size, n.Data, n.Footer, n.DataChecksum, n.Padding)
 }
+
+func (n *Needle) ParseHeader(buf []byte) {
+
+}
+
+func (n *Needle) ParseFooter(buf []byte) {
+
+}
+
+func (n *Needle) WriterHeader(buf []byte) {
+
+}
+
+func (n *Needle) WriterFooter(buf []byte) {
+
+}
+
+func (n *Needle) Write(buf []byte) {
+
+}
