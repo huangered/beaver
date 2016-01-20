@@ -1,8 +1,10 @@
 package model
 
 import (
+	"bytes"
 	"fmt"
 	"hash/crc32"
+	"parser"
 )
 
 const (
@@ -12,8 +14,9 @@ const (
 	keySize          = 8
 	alternateKeySize = 4
 	flagsSize        = 1
+	sizeSize         = 4
 	dataChecksumSize = 4
-	HeaderSize       = magicSize + cookieSize + keySize + alternateKeySize + flagsSize
+	HeaderSize       = magicSize + cookieSize + keySize + alternateKeySize + flagsSize + sizeSize
 	FooterSize       = magicSize + dataChecksumSize
 
 	// flags
@@ -71,16 +74,76 @@ Padding:         %v
 `, n.Header, n.Cookie, n.Key, n.AlternateKey, n.Flags, n.Size, n.Data, n.Footer, n.DataChecksum, n.Padding)
 }
 
-func (n *Needle) ParseHeader(buf []byte) {
-
+func (n *Needle) ParseHeader(buf []byte) (err int) {
+	var bn int
+	n.Header = buf[:magicSize]
+	if !bytes.Equal(n.Header, headerMagic) {
+		err = 1
+		return
+	}
+	bn += magicSize
+	// cookie
+	n.Cookie = parser.Int64(buf[bn:])
+	bn += cookieSize
+	// key
+	n.Key = parser.Int64(buf[bn:])
+	bn += keySize
+	// alter key
+	n.AlternateKey = parser.Int32(buf[bn:])
+	bn += alternateKeySize
+	n.Flags = buf[bn]
+	if n.Flags != FlagOk && n.Flags != FlagDel {
+		err = 2
+		return
+	}
+	bn += flagsSize
+	// size
+	n.Size = parser.Int64(buf[bn:])
+	return
 }
 
-func (n *Needle) ParseFooter(buf []byte) {
-
+// the buf contains data and footer
+func (n *Needle) ParseFooter(buf []byte) (err int) {
+	var (
+		bn       int64
+		checksum uint32
+	)
+	n.Data = buf[:n.Size]
+	bn += n.Size
+	n.Footer = buf[bn : bn+magicSize]
+	if !bytes.Equal(n.Footer, footerMagic) {
+		err = 1
+		return
+	}
+	bn += magicSize
+	checksum = crc32.Update(0, crc32Table, n.Data)
+	n.DataChecksum = parser.Uint32(buf[bn : bn+dataChecksumSize])
+	if n.DataChecksum != checksum {
+		err = 1
+		return
+	}
+	bn += dataChecksumSize
+	n.Padding = buf[bn : bn+1]
+	return
 }
 
 func (n *Needle) WriterHeader(buf []byte) {
-
+	var bn int
+	// header
+	// magic
+	bn += copy(buf, n.Header)
+	// cookie
+	parser.PutInt64(buf[bn:], n.Cookie)
+	// key
+	bn += cookieSize
+	parser.PutInt64(buf[bn:], n.Key)
+	// alterkey
+	bn += keySize
+	parser.PutInt32(buf[bn:], n.AlternateKey)
+	buf[bn] = FlagOk
+	bn += flagsSize
+	// size
+	parser.PutInt64(buf[bn:], n.Size)
 }
 
 func (n *Needle) WriterFooter(buf []byte) {

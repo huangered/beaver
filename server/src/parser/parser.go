@@ -1,6 +1,6 @@
 package parser
 
-func PutInt64(num int64, buf []byte) {
+func PutInt64(buf []byte, num int64) {
 	for i := 0; i < 8; i++ {
 		offset := uint(56 - i*8)
 		buf[i] = byte(num >> offset)
@@ -16,7 +16,7 @@ func Int64(buf []byte) int64 {
 	return num
 }
 
-func PutInt32(num int32, buf []byte) {
+func PutInt32(buf []byte, num int32) {
 	buf[0] = byte(num >> 24)
 	buf[1] = byte(num >> 16)
 	buf[2] = byte(num >> 8)
@@ -28,7 +28,7 @@ func Int32(buf []byte) int32 {
 	return num
 }
 
-func PutUint32(num uint32, buf []byte) {
+func PutUint32(buf []byte, num uint32) {
 	buf[0] = byte(num >> 24)
 	buf[1] = byte(num >> 16)
 	buf[2] = byte(num >> 8)
