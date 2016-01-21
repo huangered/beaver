@@ -2,18 +2,20 @@ package main
 
 import (
 	"log"
+	"model"
 	"net/http"
+	"time"
 )
 
 // StartApi start api http listen.
-func StartApi(addr string) {
+func StartApi(addr string, s *model.Store) {
 	go func() {
 		var (
 			err       error
 			serverMux = http.NewServeMux()
 		)
 		serverMux.Handle("/version", httpVersionHandler{})
-		serverMux.Handle("/get", httpGetHandler{})
+		serverMux.Handle("/get", httpGetHandler{s: s})
 		serverMux.Handle("/upload", httpUploadHandler{})
 		serverMux.Handle("/uploads", httpUploadsHandler{})
 		serverMux.Handle("/del", httpDelHandler{})
@@ -33,9 +35,19 @@ func (h httpVersionHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 type httpGetHandler struct {
+	s *model.Store
 }
 
 func (h httpGetHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	var (
+		now = time.Now()
+		ret = http.StatusOK
+	)
+	if r.Method != "GET" && r.Method != "HEAD" {
+		http.Error(rw, "method not allowed", ret)
+		return
+	}
+	log.Println(now)
 	var msg []byte = []byte("get")
 	rw.Write(msg)
 }
