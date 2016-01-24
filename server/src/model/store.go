@@ -4,14 +4,16 @@ import (
 	"log"
 )
 
-// Store save volumes
+// Store save volumes & conf
 type Store struct {
 	Volumes map[int32]*Volume
+	config  *Config
 }
 
-func NewStore() (s *Store) {
+func NewStore(c *Config) (s *Store) {
 	s = &Store{}
 	s.Volumes = make(map[int32]*Volume)
+	s.config = c
 	s.init()
 	return
 }

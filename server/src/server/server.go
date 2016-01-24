@@ -10,8 +10,10 @@ func main() {
 
 	var (
 		s *model.Store
+		c *model.Config
 	)
-	s = model.NewStore()
+	c = model.NewConfig("server.conf")
+	s = model.NewStore(c)
 	StartApi("localhost:8000", s)
 	StartSignal()
 }
