@@ -45,15 +45,9 @@ Size:            %d
 `, n.Key, n.AlterKey, n.Flags, n.Offset, n.Size)
 }
 
-type Index struct {
-	Superblock superblock
-	needles    []needle
+type Indexer struct {
 }
 
-func (index *Index) Parse(buf []byte) {
-
-}
-
-func (index *Index) Write() (buf []byte) {
+func NewIndexer(file string) (indexer *Indexer, err error) {
 	return
 }

@@ -75,7 +75,7 @@ func (s *Store) parseIndex(lines []string) (err error) {
 		blockFile = seqs[1]
 		indexFile = seqs[2]
 		log.Printf("Parse volume index, id: %d, block: %s, index: %s", vid, blockFile, indexFile)
-		if v, err = NewVolume(vid, blockFile, indexFile); err != nil {
+		if v, err = NewVolume(vid, blockFile, indexFile, s.config); err != nil {
 			log.Panicf("New volume error(%v)", err)
 			return
 		}
